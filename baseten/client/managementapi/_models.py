@@ -1007,6 +1007,128 @@ class DeleteSandboxParams(BaseModel):
     ] = None
 
 
+class ListSandboxPreviewsParams(BaseModel):
+    team_id: Annotated[
+        str | None,
+        Field(
+            description="Optional team ID. Must match X-Team-Id when both are supplied. If neither selector is supplied, defaults to the caller's only accessible team. Callers with multiple accessible teams must select a team. Requests without access to any team are forbidden.",
+            min_length=1,
+        ),
+    ] = None
+    cursor: Annotated[
+        str | None,
+        Field(
+            description="Opaque cursor from the previous page; omit for the first page.",
+            examples=[
+                "eyJ2IjoxLCJsYXN0X2tleSI6ImJhc2V0ZW4tYXBpLXJldmlldy0wOTE2Iiwic29ydCI6ImRlc2MifQ"
+            ],
+        ),
+    ] = None
+    limit: Annotated[
+        int,
+        Field(
+            description="Maximum number of items to return.",
+            examples=[20],
+            ge=1,
+            le=100,
+        ),
+    ] = 20
+
+
+class CreateSandboxPreviewParams(BaseModel):
+    team_id: Annotated[
+        str | None,
+        Field(
+            description="Optional team ID. Must match X-Team-Id when both are supplied. If neither selector is supplied, defaults to the caller's only accessible team. Callers with multiple accessible teams must select a team. Requests without access to any team are forbidden.",
+            min_length=1,
+        ),
+    ] = None
+
+
+class GetSandboxPreviewParams(BaseModel):
+    team_id: Annotated[
+        str | None,
+        Field(
+            description="Optional team ID. Must match X-Team-Id when both are supplied. If neither selector is supplied, defaults to the caller's only accessible team. Callers with multiple accessible teams must select a team. Requests without access to any team are forbidden.",
+            min_length=1,
+        ),
+    ] = None
+    show_secrets: Annotated[
+        bool,
+        Field(
+            description="Reveal request header values for workspace administrators, for example to change one header and send the full set back in a PATCH. Defaults to false. Callers without the admin role receive masked values even when true."
+        ),
+    ] = False
+
+
+class UpdateSandboxPreviewParams(BaseModel):
+    team_id: Annotated[
+        str | None,
+        Field(
+            description="Optional team ID. Must match X-Team-Id when both are supplied. If neither selector is supplied, defaults to the caller's only accessible team. Callers with multiple accessible teams must select a team. Requests without access to any team are forbidden.",
+            min_length=1,
+        ),
+    ] = None
+
+
+class DeleteSandboxPreviewParams(BaseModel):
+    team_id: Annotated[
+        str | None,
+        Field(
+            description="Optional team ID. Must match X-Team-Id when both are supplied. If neither selector is supplied, defaults to the caller's only accessible team. Callers with multiple accessible teams must select a team. Requests without access to any team are forbidden.",
+            min_length=1,
+        ),
+    ] = None
+
+
+class ListSandboxPreviewTokensParams(BaseModel):
+    team_id: Annotated[
+        str | None,
+        Field(
+            description="Optional team ID. Must match X-Team-Id when both are supplied. If neither selector is supplied, defaults to the caller's only accessible team. Callers with multiple accessible teams must select a team. Requests without access to any team are forbidden.",
+            min_length=1,
+        ),
+    ] = None
+    cursor: Annotated[
+        str | None,
+        Field(
+            description="Opaque cursor from the previous page; omit for the first page.",
+            examples=[
+                "eyJ2IjoxLCJsYXN0X2tleSI6ImJhc2V0ZW4tYXBpLXJldmlldy0wOTE2Iiwic29ydCI6ImRlc2MifQ"
+            ],
+        ),
+    ] = None
+    limit: Annotated[
+        int,
+        Field(
+            description="Maximum number of items to return.",
+            examples=[20],
+            ge=1,
+            le=100,
+        ),
+    ] = 20
+
+
+class CreateSandboxPreviewTokenParams(BaseModel):
+    team_id: Annotated[
+        str | None,
+        Field(
+            description="Optional team ID. Must match X-Team-Id when both are supplied. If neither selector is supplied, defaults to the caller's only accessible team. Callers with multiple accessible teams must select a team. Requests without access to any team are forbidden.",
+            min_length=1,
+        ),
+    ] = None
+
+
+class DeleteSandboxPreviewTokenParams(BaseModel):
+    team_id: Annotated[
+        str | None,
+        Field(
+            description="Optional team ID. Must match X-Team-Id when both are supplied. If neither selector is supplied, defaults to the caller's only accessible team. Callers with multiple accessible teams must select a team. Requests without access to any team are forbidden.",
+            min_length=1,
+        ),
+    ] = None
+
+
 class ListImagesParams(BaseModel):
     team_id: Annotated[
         str | None,
@@ -8235,6 +8357,25 @@ class ExploreMetadataAPIFormats(BaseModel):
     ] = False
 
 
+class RouteClassifierListingRef(BaseModel):
+    id: Annotated[
+        str,
+        Field(
+            description="Stable classifier identifier.",
+            examples=["general-v1"],
+            title="Id",
+        ),
+    ]
+    name: Annotated[
+        str,
+        Field(
+            description="Display name of the classifier.",
+            examples=["General"],
+            title="Name",
+        ),
+    ]
+
+
 class RouteRef(BaseModel):
     id: Annotated[str, Field(description="Stable route identifier.", title="Id")]
     slug: Annotated[
@@ -8257,27 +8398,15 @@ class RouteTargetBasetenModelAPI(BaseModel):
     ]
 
 
-class RouteTargetClassifierModelBased(BaseModel):
+class RouteTargetClassifier(BaseModel):
     type: Annotated[
-        Literal["CLASSIFIER_MODEL_BASED"],
-        Field(
-            description="Target kind for a classifier-model-based route.", title="Type"
-        ),
+        Literal["CLASSIFIER"],
+        Field(description="Target kind for a classifier-based route.", title="Type"),
     ]
-    classifier_model_id: Annotated[
-        str,
+    classifier: Annotated[
+        RouteClassifierListingRef | None,
         Field(
-            description="ID of the Baseten model that picks a route for each request.",
-            examples=["abcd123"],
-            title="Classifier Model Id",
-        ),
-    ]
-    classifier_environment_name: Annotated[
-        str | None,
-        Field(
-            description="Environment of the classifier model. Null for production.",
-            examples=["production"],
-            title="Classifier Environment Name",
+            description="Classifier that picks a route for each request. Null for routers created before classifiers could be selected."
         ),
     ]
     default_route: Annotated[
@@ -8329,46 +8458,23 @@ class UpsertRouteTargetBasetenModelAPI(BaseModel):
     ]
 
 
-class ClassifierEnvironmentName(RootModel[str]):
-    root: Annotated[
-        str | None,
-        Field(
-            description="Environment of the classifier model. Omit for production, which is returned as null.",
-            examples=["production"],
-            min_length=1,
-            title="Classifier Environment Name",
-        ),
-    ] = None
-
-
-class UpsertRouteTargetClassifierModelBased(BaseModel):
+class UpsertRouteTargetClassifier(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     type: Annotated[
-        Literal["CLASSIFIER_MODEL_BASED"],
-        Field(
-            description="Target kind for a classifier-model-based route. Not intended for general use: classifiers are deployed by Baseten's post-training team.",
-            title="Type",
-        ),
+        Literal["CLASSIFIER"],
+        Field(description="Target kind for a classifier-based route.", title="Type"),
     ]
-    classifier_model_id: Annotated[
+    classifier_id: Annotated[
         str,
         Field(
-            description="ID of the Baseten model that picks a route for each request. Only classifiers deployed by Baseten's post-training team are supported.",
-            examples=["abcd123"],
+            description="ID of the classifier that picks a route for each request.",
+            examples=["general-v1"],
             min_length=1,
-            title="Classifier Model Id",
+            title="Classifier Id",
         ),
     ]
-    classifier_environment_name: Annotated[
-        ClassifierEnvironmentName | None,
-        Field(
-            description="Environment of the classifier model. Omit for production, which is returned as null.",
-            examples=["production"],
-            title="Classifier Environment Name",
-        ),
-    ] = None
     allowed_route_ids: Annotated[
         list[str],
         Field(
@@ -8476,7 +8582,7 @@ class CreateRouteRequest(BaseModel):
         Annotated[
             UpsertRouteTargetBasetenModelAPI
             | UpsertRouteTargetConnection
-            | UpsertRouteTargetClassifierModelBased,
+            | UpsertRouteTargetClassifier,
             Field(
                 description="Upstream target for the route. CONNECTION targets use the provider and credentials of a connection owned by the route's team.",
                 discriminator="type",
@@ -8605,7 +8711,7 @@ class RouteTeamSpendLimitSetting(BaseModel):
     per_member_monthly_limit_usd: Annotated[
         str | None,
         Field(
-            description="Spend limit in USD for each UTC calendar month that applies to each member's Code spend in this team, unless the member has a limit of their own. Returned as an exact decimal string. Null when the team has no per-member limit.",
+            description="Spend limit in USD for each UTC calendar month that applies to each member's Grid spend in this team, unless the member has a limit of their own. Returned as an exact decimal string. Null when the team has no per-member limit.",
             examples=["200"],
             title="Per Member Monthly Limit Usd",
         ),
@@ -8613,7 +8719,7 @@ class RouteTeamSpendLimitSetting(BaseModel):
     team_wide_monthly_limit_usd: Annotated[
         str | None,
         Field(
-            description="Spend limit in USD for each UTC calendar month on the Code spend of all members in this team together. Once it is reached, every member's requests in the team are rejected. Returned as an exact decimal string. Null when the team has no team-wide limit.",
+            description="Spend limit in USD for each UTC calendar month on the Grid spend of all members in this team together. Once it is reached, every member's requests in the team are rejected. Returned as an exact decimal string. Null when the team has no team-wide limit.",
             examples=["5000"],
             title="Team Wide Monthly Limit Usd",
         ),
@@ -8717,7 +8823,7 @@ class UpdateRouteTeamSpendLimitSetting(BaseModel):
     per_member_monthly_limit_usd: Annotated[
         str | None,
         Field(
-            description="Spend limit in USD for each UTC calendar month that applies to each member's Code spend in this team, unless the member has a limit of their own. Send null to remove it; omit to leave it unchanged.",
+            description="Spend limit in USD for each UTC calendar month that applies to each member's Grid spend in this team, unless the member has a limit of their own. Send null to remove it; omit to leave it unchanged.",
             examples=["200"],
             title="Per Member Monthly Limit Usd",
         ),
@@ -8725,7 +8831,7 @@ class UpdateRouteTeamSpendLimitSetting(BaseModel):
     team_wide_monthly_limit_usd: Annotated[
         str | None,
         Field(
-            description="Spend limit in USD for each UTC calendar month on the Code spend of all members in this team together. Send null to remove it; omit to leave it unchanged.",
+            description="Spend limit in USD for each UTC calendar month on the Grid spend of all members in this team together. Send null to remove it; omit to leave it unchanged.",
             examples=["5000"],
             title="Team Wide Monthly Limit Usd",
         ),
@@ -9064,10 +9170,10 @@ class UpdateRouteRequest(BaseModel):
     target: Annotated[
         UpsertRouteTargetBasetenModelAPI
         | UpsertRouteTargetConnection
-        | UpsertRouteTargetClassifierModelBased
+        | UpsertRouteTargetClassifier
         | None,
         Field(
-            description="Complete new target configuration. Omit to keep the current configuration; null is not accepted. Only the CLASSIFIER_MODEL_BASED configuration of a router route is mutable.",
+            description="Complete new target configuration. Omit to keep the current configuration; null is not accepted. Only the CLASSIFIER configuration of a router route is mutable.",
             title="Target",
         ),
     ] = None
@@ -9915,6 +10021,164 @@ class CleanupSandboxImagesResponse(BaseModel):
             ],
         ),
     ]
+
+
+class SandboxPreviewConfiguration(BaseModel):
+    public: Annotated[
+        bool,
+        Field(
+            description="Whether the URL is reachable without a preview token. Defaults to false.",
+            examples=[True],
+        ),
+    ] = False
+    response_headers: Annotated[
+        dict[str, str] | None,
+        Field(
+            description="Headers added to every response served by the preview, for example CORS headers."
+        ),
+    ] = None
+    request_headers: Annotated[
+        dict[str, str] | None,
+        Field(
+            description='Headers added to every request forwarded to the sandbox, for example an Authorization header expected by the application. Responses return each name with the value "****", except a GET with show_secrets=true by a workspace administrator. Sending "****" back as a value returns 400. A PATCH replaces the whole set.',
+            examples=[{"Authorization": "Bearer app-internal-token"}],
+        ),
+    ] = None
+    ttl: Annotated[
+        str | None,
+        Field(
+            description="Lifetime counted from the request, using seconds, minutes, hours or composite durations such as 1h30m. Whole days are also supported, for example 7d; days cannot be combined with other units. The preview is deleted when it elapses.",
+            examples=["24h"],
+            pattern="^([0-9]+d|(([0-9]+(\\.[0-9]*)?|\\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$",
+        ),
+    ] = None
+    expires_at: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="Time at which the preview is deleted. Must be in the future.",
+            examples=["2026-10-19T12:00:00Z"],
+        ),
+    ] = None
+
+
+class CreateSandboxPreviewRequest(SandboxPreviewConfiguration):
+    create_if_not_exists: Annotated[
+        bool | None,
+        Field(
+            description="When true, return the existing preview with this name instead of failing with a conflict. Without name, the name is public-<port> or private-<port>, so the same port and visibility return the same preview. Existing configuration is preserved. Defaults to false when omitted."
+        ),
+    ] = None
+    name: Annotated[
+        str | None,
+        Field(
+            description="Preview name, unique within the sandbox. When omitted, generated from the sandbox name and port, or public-<port> or private-<port> when create_if_not_exists is true.",
+            examples=["web"],
+            max_length=49,
+            min_length=1,
+            pattern="^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+        ),
+    ] = None
+    port: Annotated[
+        int,
+        Field(description="Sandbox port to expose.", examples=[3000], ge=1, le=65535),
+    ]
+
+
+class UpdateSandboxPreviewRequest(SandboxPreviewConfiguration):
+    pass
+
+
+class SandboxPreview(SandboxPreviewConfiguration):
+    name: Annotated[
+        str,
+        Field(
+            description="Preview name, used in preview_name path parameters.",
+            examples=["web"],
+        ),
+    ]
+    port: Annotated[int, Field(description="Exposed sandbox port.", examples=[3000])]
+    url: Annotated[
+        AnyUrl,
+        Field(
+            description="HTTPS URL serving the port, including the region label. Use this exact URL. Requests to a private preview need a token.",
+            examples=["https://a1b2c3d4e5f6g7h8.us-pdx-1.preview.b10.co"],
+        ),
+    ]
+    status: Annotated[
+        Literal["DEPLOYING", "DEPLOYED", "FAILED", "DELETING", "TERMINATED"] | str,
+        Field(description="Preview status, always uppercase.", examples=["DEPLOYED"]),
+    ]
+    region: Annotated[
+        str | None,
+        Field(
+            description="Region serving the preview, the sandbox's region.",
+            examples=["us-pdx-1"],
+        ),
+    ] = None
+    created_at: Annotated[
+        AwareDatetime | None, Field(examples=["2026-10-12T12:00:00Z"])
+    ] = None
+    updated_at: Annotated[
+        AwareDatetime | None, Field(examples=["2026-10-12T12:00:00Z"])
+    ] = None
+    created_by: Annotated[str | None, Field(examples=["sandbox-automation"])] = None
+    updated_by: Annotated[str | None, Field(examples=["sandbox-automation"])] = None
+    public: Annotated[
+        bool,
+        Field(
+            description="Whether the URL is reachable without a preview token. Defaults to false.",
+            examples=[True],
+        ),
+    ]
+
+
+class ListSandboxPreviewsResponse(BaseModel):
+    items: Annotated[list[SandboxPreview], Field(description="Resources on this page.")]
+    pagination: SandboxApiPagination
+
+
+class CreateSandboxPreviewTokenRequest(BaseModel):
+    create_if_not_exists: Annotated[
+        bool | None,
+        Field(
+            description="When true, return an existing unexpired token of this preview that stays valid at least until expires_at instead of creating a new one. Defaults to false when omitted."
+        ),
+    ] = None
+    expires_at: Annotated[
+        AwareDatetime,
+        Field(
+            description="Time at which the token stops working. Must be in the future.",
+            examples=["2026-10-13T12:00:00Z"],
+        ),
+    ]
+
+
+class SandboxPreviewToken(BaseModel):
+    name: Annotated[
+        str,
+        Field(
+            description="Token name, used in token_name path parameters.",
+            examples=["7f3k2m9q1x8c4v6b0n5z"],
+        ),
+    ]
+    token: Annotated[
+        str,
+        Field(
+            description="Value to send as the bl_preview_token query parameter.",
+            examples=["7f3k2m9q1x8c4v6b0n5z"],
+        ),
+    ]
+    expires_at: Annotated[AwareDatetime, Field(examples=["2026-10-13T12:00:00Z"])]
+    expired: Annotated[
+        bool, Field(description="Whether expires_at has passed.", examples=[False])
+    ]
+
+
+class ListSandboxPreviewTokensResponse(BaseModel):
+    items: Annotated[
+        list[SandboxPreviewToken], Field(description="Resources on this page.")
+    ]
+    pagination: SandboxApiPagination
 
 
 class LoadCheckpointConfig(BaseModel):
@@ -13307,9 +13571,7 @@ class Route(BaseModel):
     ]
     target: Annotated[
         Annotated[
-            RouteTargetBasetenModelAPI
-            | RouteTargetConnection
-            | RouteTargetClassifierModelBased,
+            RouteTargetBasetenModelAPI | RouteTargetConnection | RouteTargetClassifier,
             Field(
                 description="Configured upstream target.",
                 discriminator="type",
@@ -13450,13 +13712,13 @@ class RouteTeamUserSettings(BaseModel):
     spend_limit: Annotated[
         RouteSpendLimitSetting,
         Field(
-            description="Spend limit for Baseten Code in the team. Applies to requests with Routes keys the user created in the team; personal API keys are not limited."
+            description="Spend limit for Baseten Grid in the team. Applies to requests with Routes keys the user created in the team; personal API keys are not limited."
         ),
     ]
     month_spend_usd: Annotated[
         str,
         Field(
-            description="The user's metered Code spend in USD in the team this UTC calendar month, returned as an exact decimal string.",
+            description="The user's metered Grid spend in USD in the team this UTC calendar month, returned as an exact decimal string.",
             examples=["12.5"],
             title="Month Spend Usd",
         ),
@@ -13480,7 +13742,7 @@ class RouteUserTeamSettingsList(BaseModel):
     teams: Annotated[
         list[RouteTeamUserSettings],
         Field(
-            description="The user's settings in each team they have a role in and in any team they have Code spend in this month, alphabetical by team name.",
+            description="The user's settings in each team they have a role in and in any team they have Grid spend in this month, alphabetical by team name.",
             title="Teams",
         ),
     ]
@@ -13501,7 +13763,7 @@ class RouteTeamUserSettingsList(BaseModel):
     users: Annotated[
         list[RouteTeamUserSettings],
         Field(
-            description="Settings of each user with a role in the team and of anyone with Code spend in the team this month.",
+            description="Settings of each user with a role in the team and of anyone with Grid spend in the team this month.",
             title="Users",
         ),
     ]
@@ -14378,7 +14640,7 @@ class RouteTeamSettings(BaseModel):
     spend_limit: Annotated[
         RouteTeamSpendLimitSetting,
         Field(
-            description="Spend limits for Baseten Code for members' spend in this team."
+            description="Spend limits for Baseten Grid for members' spend in this team."
         ),
     ]
 
